@@ -9,7 +9,9 @@ log = logging.getLogger(__name__)
 class RssScraper:
     def __init__(self, keywords: dict):
         self.keywords = keywords
-        self.sources = keywords.get("sources", {}).get("rss", [])
+        rss_sources = keywords.get("sources", {}).get("rss", []) 
+        alert_sources = keywords.get("sources", {}).get("google_alerts", []) 
+        self.sources = rss_sources + alert_sources
 
     def fetch(self) -> list[dict]:
         articles = []
