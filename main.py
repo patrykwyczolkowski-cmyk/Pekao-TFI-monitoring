@@ -42,7 +42,8 @@ def main():
     articles = []
     articles += RssScraper(keywords).fetch()
     articles += BankierScraper(keywords).fetch()
-    articles += WykopScraper(keywords).fetch()
+    articles += WykopScraper(keywords).fetch() 
+    articles += YouTubeScraper(keywords).fetch()
     log.info(f"Zebrano łącznie: {len(articles)} artykułów")
 
     # 2. Deduplikacja
