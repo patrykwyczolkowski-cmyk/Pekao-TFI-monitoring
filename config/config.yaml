@@ -1,0 +1,37 @@
+project:
+  name: "Pekao TFI Media Monitor"
+  version: "1.0"
+  timezone: "Europe/Warsaw"
+
+sheets:
+  spreadsheet_id: "WKLEJ_TUTAJ_ID_ARKUSZA"
+  tabs:
+    raw_data: "raw_data"
+    weekly: "weekly_summary"
+    monthly: "monthly_summary"
+    management: "management_mentions"
+    dedup_cache: "url_cache"
+
+thresholds:
+  crisis: 3
+  praise: 9
+  trend_drop: 1.5
+
+limits:
+  max_articles_per_run: 100
+  max_comments_per_article: 50
+  gemini_requests_per_minute: 15
+
+reports:
+  weekly_day: "monday"
+  monthly_day: 1
+  email_recipients:
+    - "TWOJ_EMAIL@domena.pl"
+
+drive:
+  root_folder: "Pekao TFI — Monitoring"
+  subfolders:
+    weekly: "Raporty Tygodniowe"
+    monthly: "Raporty Miesięczne"
+    alerts: "Alerty Kryzysowe"
+    raw: "Raw Data"
