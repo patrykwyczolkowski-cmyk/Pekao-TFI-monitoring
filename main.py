@@ -10,7 +10,8 @@ from datetime import datetime
 
 from scrapers.rss_scraper import RssScraper
 from scrapers.bankier_scraper import BankierScraper
-from scrapers.wykop_scraper import WykopScraper
+from scrapers.wykop_scraper import WykopScraper 
+from scrapers.youtube_scraper import YouTubeScraper
 from processors.deduplicator import Deduplicator
 from processors.gemini_engine import GeminiEngine
 from processors.management_tracker import ManagementTracker
