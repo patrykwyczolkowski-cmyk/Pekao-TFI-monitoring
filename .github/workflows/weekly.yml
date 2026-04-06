@@ -1,0 +1,31 @@
+name: Weekly Report — Pekao TFI
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'  # Każdy poniedziałek o 8:00 czasu polskiego
+  workflow_dispatch:
+
+jobs:
+  weekly_report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pobierz kod
+        uses: actions/checkout@v4
+
+      - name: Skonfiguruj Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Zainstaluj zależności
+        run: pip install -r requirements.txt
+
+      - name: Generuj raport tygodniowy
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python weekly_runner.py
