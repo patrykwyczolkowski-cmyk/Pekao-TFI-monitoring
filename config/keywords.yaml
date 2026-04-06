@@ -1,0 +1,73 @@
+primary:
+  - "Pekao TFI"
+  - "Pekao Towarzystwo Funduszy Inwestycyjnych"
+  - "pekaotfi.pl"
+
+secondary:
+  - "fundusze Pekao"
+  - "Pekao fundusz"
+  - "Pekao Pioneer"
+  - "BPH TFI"
+
+typos:
+  - "Pekao TIF"
+  - "Pekao TF1"
+  - "Pecao TFI"
+  - "Pakao TFI"
+
+exclude:
+  - "PKO TFI"
+  - "PKO Towarzystwo"
+  - "pko tfi"
+
+management:
+  board:
+    - name: "Marlena Janota"
+      role: "Prezes Zarządu"
+      keywords:
+        - "Marlena Janota"
+        - "prezes Pekao TFI"
+        - "prezeska Pekao TFI"
+
+    - name: "Jacek Babiński"
+      role: "Wiceprezes — Zarządzanie Aktywami"
+      keywords:
+        - "Jacek Babiński"
+        - "Babiński CFA"
+        - "Babiński Pekao"
+
+    - name: "Maciej Łoziński"
+      role: "Wiceprezes — Ryzyko i Operacje"
+      keywords:
+        - "Maciej Łoziński"
+        - "Łoziński Pekao"
+
+sources:
+  rss:
+    - name: "Google News PL"
+      url: "https://news.google.com/rss/search?q=Pekao+TFI&hl=pl&gl=PL&ceid=PL:pl"
+      type: "news"
+
+    - name: "Bankier"
+      url: "https://www.bankier.pl/rss/wiadomosci.xml"
+      type: "news"
+
+    - name: "Parkiet"
+      url: "https://www.parkiet.com/rss/rss.xml"
+      type: "news"
+
+    - name: "PAP Biznes"
+      url: "https://biznes.pap.pl/pl/rss"
+      type: "news"
+
+    - name: "Stockwatch"
+      url: "https://stockwatch.pl/rss/news.aspx"
+      type: "news"
+
+    - name: "Analizy.pl"
+      url: "https://www.analizy.pl/rss"
+      type: "news"
+
+  google_alerts:
+    - name: "Google Alert — Pekao TFI"
+      url: "WKLEJ_URL_RSS_Z_GOOGLE_ALERTS"
