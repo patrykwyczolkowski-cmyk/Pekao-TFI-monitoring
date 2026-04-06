@@ -1,12 +1,17 @@
+import io
 import os
 import json
 import logging
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.colors import HexColor
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.units import cm
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -24,6 +29,14 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
+
+# Nagłówki kolumn w Google Sheets (raw_data)
+RAW_DATA_HEADERS = [
+    "date", "source", "title", "url",
+    "sentyment_artykul", "sentyment_komentarze", "sentyment_koncowy",
+    "kategoria", "podsumowanie", "pilnosc", "wymaga_reakcji", "liczba_komentarzy"
+]
+
 
 class ReportGenerator:
     def __init__(self, config: dict):
@@ -78,15 +91,18 @@ class ReportGenerator:
             cutoff = datetime.now() - timedelta(days=days)
             filtered = []
             for r in records:
+                raw_date = r.get("date", "")
+                if not raw_date:
+                    continue
                 try:
-                    date = datetime.fromisoformat(r.get("data", ""))
+                    date = datetime.fromisoformat(str(raw_date))
                     if date >= cutoff:
                         filtered.append(r)
-                except:
-                    filtered.append(r)
+                except ValueError:
+                    log.warning(f"Niepoprawna data w rekordzie: {raw_date!r} — pomijam")
             return filtered
         except Exception as e:
-            log.error(f"Błąd pobierania danych: {e}")
+            log.error(f"Błąd pobierania danych z Sheets: {e}")
             return []
 
     def _save_csv(self, data: list[dict], name: str, folder_key: str):
@@ -97,7 +113,7 @@ class ReportGenerator:
             self._upload_to_drive(path, f"{name}.csv", folder_key)
             log.info(f"CSV zapisany: {name}.csv")
         except Exception as e:
-            log.error(f"Błąd CSV: {e}")
+            log.error(f"Błąd generowania CSV: {e}")
 
     def _save_json(self, data: list[dict], name: str, folder_key: str):
         try:
@@ -113,7 +129,7 @@ class ReportGenerator:
             self._upload_to_drive(path, f"{name}.json", folder_key)
             log.info(f"JSON zapisany: {name}.json")
         except Exception as e:
-            log.error(f"Błąd JSON: {e}")
+            log.error(f"Błąd generowania JSON: {e}")
 
     def _save_pdf(self, data: list[dict], name: str, folder_key: str, title: str):
         try:
@@ -146,14 +162,14 @@ class ReportGenerator:
             story.append(Spacer(1, 0.5*cm))
 
             # Podsumowanie
-            summary_style = ParagraphStyle(
-                "Summary",
+            section_style = ParagraphStyle(
+                "Section",
                 fontSize=12,
                 textColor=PEKAO_DARK,
-                fontName="Helvetica-Bold"
+                fontName="Helvetica-Bold",
+                spaceAfter=0.3*cm
             )
-            story.append(Paragraph("Podsumowanie", summary_style))
-            story.append(Spacer(1, 0.3*cm))
+            story.append(Paragraph("Podsumowanie", section_style))
 
             summary_data = [
                 ["Wskaźnik", "Wartość"],
@@ -179,42 +195,115 @@ class ReportGenerator:
             story.append(table)
             story.append(Spacer(1, 0.5*cm))
 
+            # Wykres trendu sentymentu
+            chart_image = self._build_trend_chart(data)
+            if chart_image:
+                story.append(Paragraph("Trend sentymentu", section_style))
+                story.append(chart_image)
+                story.append(Spacer(1, 0.5*cm))
+
             # Wzmianki
-            story.append(Paragraph("Wzmianki", summary_style))
-            story.append(Spacer(1, 0.3*cm))
+            story.append(Paragraph("Wzmianki (top 50)", section_style))
+
+            item_style = ParagraphStyle(
+                "Item",
+                fontSize=10,
+                spaceAfter=0.15*cm
+            )
+            desc_style = ParagraphStyle(
+                "Desc",
+                fontSize=9,
+                textColor=HexColor("#555555"),
+                spaceAfter=0.25*cm
+            )
 
             for item in data[:50]:
-                score = item.get("sentyment_końcowy", 5)
+                score = item.get("sentyment_koncowy", 5)
+                try:
+                    score = float(score)
+                except (TypeError, ValueError):
+                    score = 5.0
+
                 color = (
                     "#CC0000" if score <= 3
                     else "#228B22" if score >= 9
                     else "#1A1A2E"
                 )
-                item_style = ParagraphStyle(
-                    "Item",
-                    fontSize=10,
-                    textColor=HexColor(color),
-                    spaceAfter=0.2*cm
+                styled_item = ParagraphStyle(
+                    "ItemDynamic",
+                    parent=item_style,
+                    textColor=HexColor(color)
                 )
                 story.append(Paragraph(
-                    f"[{score}/10] {item.get('tytuł', item.get('title', ''))} "
-                    f"— {item.get('źródło', item.get('source', ''))} "
-                    f"({item.get('data', '')})",
-                    item_style
+                    f"[{score:.0f}/10] {item.get('title', '')} "
+                    f"— {item.get('source', '')} "
+                    f"({item.get('date', '')[:10]})",
+                    styled_item
                 ))
                 if item.get("podsumowanie"):
-                    story.append(Paragraph(
-                        item["podsumowanie"],
-                        styles["Normal"]
-                    ))
-                story.append(Spacer(1, 0.2*cm))
+                    story.append(Paragraph(item["podsumowanie"], desc_style))
 
             doc.build(story)
             self._upload_to_drive(path, f"{name}.pdf", folder_key)
             log.info(f"PDF zapisany: {name}.pdf")
 
         except Exception as e:
-            log.error(f"Błąd PDF: {e}")
+            log.error(f"Błąd generowania PDF: {e}")
+
+    def _build_trend_chart(self, data: list[dict]):
+        """Generuje wykres liniowy trendu sentymentu i zwraca reportlab Image."""
+        try:
+            rows = []
+            for r in data:
+                raw_date = r.get("date", "")
+                score = r.get("sentyment_koncowy")
+                if not raw_date or score is None:
+                    continue
+                try:
+                    date = datetime.fromisoformat(str(raw_date))
+                    score = float(score)
+                    rows.append({"date": date, "score": score})
+                except (ValueError, TypeError):
+                    continue
+
+            if not rows:
+                return None
+
+            df = pd.DataFrame(rows).sort_values("date")
+            # Grupuj po dniu, średnia sentymentu
+            df["day"] = df["date"].dt.date
+            daily = df.groupby("day")["score"].mean().reset_index()
+
+            fig, ax = plt.subplots(figsize=(14, 4))
+            ax.plot(
+                [datetime.combine(d, datetime.min.time()) for d in daily["day"]],
+                daily["score"],
+                color="#CC0000",
+                linewidth=2,
+                marker="o",
+                markersize=4
+            )
+            ax.axhline(y=3, color="#FF6666", linestyle="--", linewidth=1, label="Próg kryzysu (3)")
+            ax.axhline(y=9, color="#66BB66", linestyle="--", linewidth=1, label="Próg pochwały (9)")
+            ax.set_ylim(1, 10)
+            ax.set_ylabel("Sentyment (1–10)")
+            ax.set_xlabel("Data")
+            ax.legend(fontsize=8)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d.%m"))
+            ax.xaxis.set_major_locator(mdates.DayLocator())
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+
+            buf = io.BytesIO()
+            fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
+            plt.close(fig)
+            buf.seek(0)
+
+            return Image(buf, width=16*cm, height=5*cm)
+
+        except Exception as e:
+            log.error(f"Błąd generowania wykresu: {e}")
+            return None
 
     def _calculate_summary(self, data: list[dict]) -> dict:
         if not data:
@@ -225,17 +314,21 @@ class ReportGenerator:
                 "praise_count": 0,
                 "top_source": "brak"
             }
-        scores = [
-            float(r.get("sentyment_końcowy", 5))
-            for r in data
-            if r.get("sentyment_końcowy")
-        ]
-        sources = [r.get("źródło", r.get("source", "")) for r in data]
+        scores = []
+        for r in data:
+            val = r.get("sentyment_koncowy")
+            if val is not None:
+                try:
+                    scores.append(float(val))
+                except (TypeError, ValueError):
+                    pass
+
+        sources = [r.get("source", "") for r in data]
         top_source = max(set(sources), key=sources.count) if sources else "brak"
 
         return {
             "total_mentions": len(data),
-            "avg_score": sum(scores) / len(scores) if scores else 0,
+            "avg_score": round(sum(scores) / len(scores), 2) if scores else 0,
             "crisis_count": sum(1 for s in scores if s <= 3),
             "praise_count": sum(1 for s in scores if s >= 9),
             "top_source": top_source
@@ -297,4 +390,4 @@ class ReportGenerator:
             log.info(f"Przesłano na Drive: {filename}")
 
         except Exception as e:
-            log.error(f"Błąd uploadu na Drive: {e}")
+            log.error(f"Błąd uploadu na Drive {filename}: {e}")

@@ -4,14 +4,16 @@ Pekao TFI Media Monitor — Daily Runner
 Uruchamiany przez GitHub Actions codziennie.
 """
 
+import time
 import yaml
 import logging
 from datetime import datetime
 
 from scrapers.rss_scraper import RssScraper
 from scrapers.bankier_scraper import BankierScraper
-from scrapers.wykop_scraper import WykopScraper 
+from scrapers.wykop_scraper import WykopScraper
 from scrapers.youtube_scraper import YouTubeScraper
+from scrapers.reddit_scraper import RedditScraper
 from processors.deduplicator import Deduplicator
 from processors.gemini_engine import GeminiEngine
 from processors.management_tracker import ManagementTracker
@@ -42,8 +44,9 @@ def main():
     articles = []
     articles += RssScraper(keywords).fetch()
     articles += BankierScraper(keywords).fetch()
-    articles += WykopScraper(keywords).fetch() 
+    articles += WykopScraper(keywords).fetch()
     articles += YouTubeScraper(keywords).fetch()
+    articles += RedditScraper(keywords).fetch()
     log.info(f"Zebrano łącznie: {len(articles)} artykułów")
 
     # 2. Deduplikacja
@@ -61,10 +64,14 @@ def main():
     log.info("--- Krok 3: Analiza AI (Gemini) ---")
     gemini = GeminiEngine(config)
     results = []
+    rpm_limit = config.get("limits", {}).get("gemini_requests_per_minute", 15)
+    delay = 60.0 / rpm_limit  # sekundy między requestami
     for i, article in enumerate(articles):
         log.info(f"Analizuję [{i+1}/{len(articles)}]: {article.get('title', '')[:50]}")
         result = gemini.analyze(article)
         results.append(result)
+        if i < len(articles) - 1:
+            time.sleep(delay)
 
     # 4. Monitoring zarządu
     log.info("--- Krok 4: Monitoring zarządu ---")

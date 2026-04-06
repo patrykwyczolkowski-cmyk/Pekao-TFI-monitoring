@@ -1,5 +1,5 @@
 import logging
-from alerts.slack_notifier import SlackNotifier
+from alerts.email_notifier import EmailNotifier
 
 log = logging.getLogger(__name__)
 
@@ -9,8 +9,7 @@ class AlertEngine:
         self.results = results
         self.crisis_threshold = config["thresholds"]["crisis"]
         self.praise_threshold = config["thresholds"]["praise"]
-        self.trend_drop = config["thresholds"]["trend_drop"]
-        self.slack = SlackNotifier(config)
+        self.notifier = EmailNotifier(config)
 
     def check_and_send(self):
         crisis_items = []
@@ -20,7 +19,7 @@ class AlertEngine:
             if not r.get("dotyczy_pekao_tfi"):
                 continue
 
-            score = r.get("sentyment_końcowy", 5)
+            score = r.get("sentyment_koncowy", 5)
 
             if score <= self.crisis_threshold:
                 crisis_items.append(r)
@@ -39,25 +38,25 @@ class AlertEngine:
             log.info("Brak alertów — wszystko w normie")
 
     def _send_crisis_alert(self, items: list[dict]):
-        message = "🚨 *ALERT KRYZYSOWY — Pekao TFI*\n\n"
+        message = "ALERT KRYZYSOWY — Pekao TFI\n\n"
         for item in items:
             message += (
-                f"*Źródło:* {item.get('source')}\n"
-                f"*Tytuł:* {item.get('title')}\n"
-                f"*Wynik:* {item.get('sentyment_końcowy')}/10\n"
-                f"*Opis:* {item.get('podsumowanie')}\n"
-                f"*Link:* {item.get('url')}\n\n"
+                f"Źródło: {item.get('source')}\n"
+                f"Tytuł: {item.get('title')}\n"
+                f"Wynik: {item.get('sentyment_koncowy')}/10\n"
+                f"Opis: {item.get('podsumowanie')}\n"
+                f"Link: {item.get('url')}\n\n"
             )
-        self.slack.send(message, urgent=True)
+        self.notifier.send(message, urgent=True)
 
     def _send_praise_alert(self, items: list[dict]):
-        message = "🏆 *POCHWAŁA — Pekao TFI*\n\n"
+        message = "POCHWAŁA — Pekao TFI\n\n"
         for item in items:
             message += (
-                f"*Źródło:* {item.get('source')}\n"
-                f"*Tytuł:* {item.get('title')}\n"
-                f"*Wynik:* {item.get('sentyment_końcowy')}/10\n"
-                f"*Opis:* {item.get('podsumowanie')}\n"
-                f"*Link:* {item.get('url')}\n\n"
+                f"Źródło: {item.get('source')}\n"
+                f"Tytuł: {item.get('title')}\n"
+                f"Wynik: {item.get('sentyment_koncowy')}/10\n"
+                f"Opis: {item.get('podsumowanie')}\n"
+                f"Link: {item.get('url')}\n\n"
             )
-        self.slack.send(message, urgent=False)
+        self.notifier.send(message, urgent=False)
