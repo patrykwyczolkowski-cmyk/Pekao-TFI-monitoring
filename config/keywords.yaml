@@ -28,14 +28,12 @@ management:
         - "Marlena Janota"
         - "prezes Pekao TFI"
         - "prezeska Pekao TFI"
-
     - name: "Jacek Babiński"
       role: "Wiceprezes — Zarządzanie Aktywami"
       keywords:
         - "Jacek Babiński"
         - "Babiński CFA"
         - "Babiński Pekao"
-
     - name: "Maciej Łoziński"
       role: "Wiceprezes — Ryzyko i Operacje"
       keywords:
@@ -47,27 +45,32 @@ sources:
     - name: "Google News PL"
       url: "https://news.google.com/rss/search?q=Pekao+TFI&hl=pl&gl=PL&ceid=PL:pl"
       type: "news"
-
     - name: "Bankier"
       url: "https://www.bankier.pl/rss/wiadomosci.xml"
       type: "news"
-
     - name: "Parkiet"
       url: "https://www.parkiet.com/rss/rss.xml"
       type: "news"
-
     - name: "PAP Biznes"
       url: "https://biznes.pap.pl/pl/rss"
       type: "news"
-
     - name: "Stockwatch"
       url: "https://stockwatch.pl/rss/news.aspx"
       type: "news"
-
     - name: "Analizy.pl"
       url: "https://www.analizy.pl/rss"
       type: "news"
 
   google_alerts:
     - name: "Google Alert — Pekao TFI"
-      url: "WKLEJ_URL_RSS_Z_GOOGLE_ALERTS"
+      url: "https://www.google.com/alerts/feeds/09886646610251215715/6055322165665396898"
+    - name: "Google Alert — Pekao Towarzystwo Funduszy"
+      url: "https://www.google.com/alerts/feeds/09886646610251215715/6057190138654792081"
+    - name: "Google Alert — fundusze Pekao"
+      url: "https://www.google.com/alerts/feeds/09886646610251215715/3660427219404160080"
+    - name: "Google Alert — Marlena Janota"
+      url: "https://www.google.com/alerts/feeds/09886646610251215715/10175843850402478322"
+    - name: "Google Alert — Jacek Babinski"
+      url: "https://www.google.com/alerts/feeds/09886646610251215715/841501357383045446"
+    - name: "Google Alert — Maciej Lozinski"
+      url: "https://www.google.com/alerts/feeds/09886646610251215715/13086882948423092590"
