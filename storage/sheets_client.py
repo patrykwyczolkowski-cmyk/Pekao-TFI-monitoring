@@ -14,7 +14,7 @@ SCOPES = [
 class SheetsClient:
     def __init__(self, config: dict):
         self.config = config
-        self.spreadsheet_id = config["sheets"]["spreadsheet_id"]
+        self.spreadsheet_id = os.environ.get("SPREADSHEET_ID") or config["sheets"]["spreadsheet_id"]
         self.tabs = config["sheets"]["tabs"]
         self.client = self._authenticate()
         self.spreadsheet = self.client.open_by_key(self.spreadsheet_id)
