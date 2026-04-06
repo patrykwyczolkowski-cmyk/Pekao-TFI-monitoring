@@ -26,7 +26,7 @@ reports:
   weekly_day: "monday"
   monthly_day: 1
   email_recipients:
-    - "TWOJ_EMAIL@domena.pl"
+    - "patryk.wyczolkowski@gmail.com"
 
 drive:
   root_folder: "Pekao TFI — Monitoring"
