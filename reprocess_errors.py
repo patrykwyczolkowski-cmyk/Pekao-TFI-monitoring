@@ -95,7 +95,7 @@ def main():
                                 worksheet.update_cell(i, headers.index("podsumowanie") + 1, res["podsumowanie"])
 
                         log.info(f"  -> Wiersz {i} naprawiony.")
-                        time.sleep(delay)
+                        time.sleep(15)
                     except Exception as e:
                         log.error(f"  -> BŁĄD wiersza {i}: {e}")
         except Exception as e:
