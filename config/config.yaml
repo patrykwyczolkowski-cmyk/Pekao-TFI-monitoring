@@ -22,7 +22,7 @@ thresholds:
 limits:
   max_articles_per_run: 100
   max_comments_per_article: 50
-  gemini_requests_per_minute: 15
+  gemini_requests_per_minute: 4 # Skrypt będzie czekał 15 sekund między wierszami
 
 reports:
   weekly_day: "monday"
