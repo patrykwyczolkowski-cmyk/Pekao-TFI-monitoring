@@ -6,12 +6,15 @@ from dateutil import parser as dateparser
 
 log = logging.getLogger(__name__)
 
+
 class RssScraper:
     def __init__(self, keywords: dict):
         self.keywords = keywords
-        rss_sources = keywords.get("sources", {}).get("rss", []) 
-        alert_sources = keywords.get("sources", {}).get("google_alerts", []) 
-        self.sources = rss_sources + alert_sources
+        sources_cfg = keywords.get("sources", {})
+        rss_sources = sources_cfg.get("rss", [])
+        alert_sources = sources_cfg.get("google_alerts", [])
+        blogger_sources = sources_cfg.get("bloggers", [])
+        self.sources = rss_sources + alert_sources + blogger_sources
 
     def fetch(self) -> list[dict]:
         articles = []
@@ -19,24 +22,31 @@ class RssScraper:
             log.info(f"Scrapuję RSS: {source['name']}")
             try:
                 feed = feedparser.parse(source["url"])
+                if not feed.entries:
+                    log.warning(f"Pusty feed lub brak wpisów: {source['name']}")
+                    continue
+                source_type = source.get("type", "news")
                 for entry in feed.entries:
-                    article = self._parse_entry(entry, source["name"])
+                    article = self._parse_entry(entry, source["name"], source_type)
                     if article and self._is_relevant(article):
                         articles.append(article)
             except Exception as e:
                 log.error(f"Błąd RSS {source['name']}: {e}")
         return articles
 
-    def _parse_entry(self, entry, source_name: str) -> dict | None:
+    def _parse_entry(self, entry, source_name: str, source_type: str) -> dict | None:
         try:
             url = entry.get("link", "")
+            if not url:
+                return None
+
             title = entry.get("title", "")
             summary = entry.get("summary", "")
             pub_date = entry.get("published", "")
 
             try:
                 date = dateparser.parse(pub_date).isoformat()
-            except:
+            except Exception:
                 date = datetime.now().isoformat()
 
             return {
@@ -45,12 +55,12 @@ class RssScraper:
                 "title": title,
                 "content": summary,
                 "source": source_name,
-                "type": "news",
+                "type": source_type,
                 "date": date,
                 "comments": []
             }
         except Exception as e:
-            log.error(f"Błąd parsowania wpisu: {e}")
+            log.error(f"Błąd parsowania wpisu RSS ({source_name}): {e}")
             return None
 
     def _is_relevant(self, article: dict) -> bool:

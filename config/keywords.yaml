@@ -40,6 +40,41 @@ management:
         - "Maciej Łoziński"
         - "Łoziński Pekao"
 
+competitors:
+  - name: "PKO TFI"
+    short: "PKO TFI"
+    keywords:
+      - "PKO TFI"
+      - "PKO Towarzystwo Funduszy Inwestycyjnych"
+      - "fundusze PKO"
+      - "pko tfi"
+    rss:
+      - name: "Google News — PKO TFI"
+        url: "https://news.google.com/rss/search?q=PKO+TFI&hl=pl&gl=PL&ceid=PL:pl"
+      - name: "Bankier RSS — PKO TFI"
+        url: "https://www.bankier.pl/rss/wiadomosci.xml"
+
+  - name: "TFI PZU"
+    short: "TFI PZU"
+    keywords:
+      - "TFI PZU"
+      - "PZU Towarzystwo Funduszy Inwestycyjnych"
+      - "fundusze PZU"
+      - "TFI PZU SA"
+    rss:
+      - name: "Google News — TFI PZU"
+        url: "https://news.google.com/rss/search?q=TFI+PZU&hl=pl&gl=PL&ceid=PL:pl"
+
+  - name: "Goldman Sachs TFI"
+    short: "GS TFI"
+    keywords:
+      - "Goldman Sachs TFI"
+      - "Goldman Sachs Towarzystwo Funduszy Inwestycyjnych"
+      - "Goldman Sachs Asset Management Polska"
+    rss:
+      - name: "Google News — Goldman Sachs TFI"
+        url: "https://news.google.com/rss/search?q=Goldman+Sachs+TFI&hl=pl&gl=PL&ceid=PL:pl"
+
 sources:
   rss:
     - name: "Google News PL"
@@ -57,8 +92,11 @@ sources:
     - name: "Stockwatch"
       url: "https://stockwatch.pl/rss/news.aspx"
       type: "news"
-    - name: "Analizy.pl"
-      url: "https://www.analizy.pl/rss"
+    - name: "Analizy.pl — Pekao TFI (Google News)"
+      url: "https://news.google.com/rss/search?q=site:analizy.pl+%22Pekao+TFI%22&hl=pl&gl=PL&ceid=PL:pl"
+      type: "news"
+    - name: "Analizy.pl — fundusze Pekao (Google News)"
+      url: "https://news.google.com/rss/search?q=site:analizy.pl+%22fundusze+Pekao%22&hl=pl&gl=PL&ceid=PL:pl"
       type: "news"
 
   google_alerts:
@@ -74,3 +112,30 @@ sources:
       url: "https://www.google.com/alerts/feeds/09886646610251215715/841501357383045446"
     - name: "Google Alert — Maciej Lozinski"
       url: "https://www.google.com/alerts/feeds/09886646610251215715/13086882948423092590"
+
+  bloggers:
+    # Czołowi polscy blogerzy inwestycyjni — RSS filtrowany po słowach kluczowych Pekao TFI
+    - name: "Jak oszczedzac pieniadze (Szafranski)"
+      url: "https://jakoszczedzacpieniadze.pl/feed"
+      type: "blog"
+    - name: "Finanse bardzo osobiste (Iwuc)"
+      url: "https://finanseosobiste.pl/feed"
+      type: "blog"
+    - name: "Inwestomat (Glowacki)"
+      url: "https://inwestomat.eu/feed"
+      type: "blog"
+    - name: "System Trader (Lempart)"
+      url: "https://systemtrader.pl/feed"
+      type: "blog"
+    - name: "By samego siebie (Samolyk)"
+      url: "https://bysamegosiebie.pl/feed"
+      type: "blog"
+    - name: "Long Term (Rokicki)"
+      url: "https://longterm.pl/feed"
+      type: "blog"
+    - name: "Doradca.tv (Jaroszek)"
+      url: "https://doradca.tv/feed"
+      type: "blog"
+    - name: "Merytorycznie o finansach (Kuchciak)"
+      url: "https://merytorycznie.pl/feed"
+      type: "blog"

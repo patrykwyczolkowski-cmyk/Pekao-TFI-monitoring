@@ -1,3 +1,4 @@
+import os
 import requests
 import hashlib
 import logging
@@ -7,12 +8,25 @@ log = logging.getLogger(__name__)
 
 API_BASE = "https://wykop.pl/api/v3"
 
+
 class WykopScraper:
     def __init__(self, keywords: dict):
         self.keywords = keywords
-        self.headers = {"Accept": "application/json"}
+        api_key = os.environ.get("WYKOP_API_KEY")
+        if api_key:
+            self.headers = {
+                "Accept": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+            self.enabled = True
+        else:
+            log.warning("Brak WYKOP_API_KEY — pomijam Wykop")
+            self.enabled = False
 
     def fetch(self) -> list[dict]:
+        if not self.enabled:
+            return []
+
         results = []
         results += self._search_entries("Pekao TFI")
         results += self._search_entries("pekaotfi")
@@ -27,6 +41,13 @@ class WykopScraper:
                 headers=self.headers,
                 timeout=10
             )
+            if resp.status_code == 401:
+                log.error("Wykop API: błąd autoryzacji (401) — sprawdź WYKOP_API_KEY")
+                return []
+            if resp.status_code != 200:
+                log.error(f"Wykop API: błąd HTTP {resp.status_code}")
+                return []
+
             data = resp.json()
             entries = data.get("data", [])
 
@@ -51,6 +72,7 @@ class WykopScraper:
                     "comments": comments
                 })
             return results
+
         except Exception as e:
             log.error(f"Błąd Wykop API: {e}")
             return []
