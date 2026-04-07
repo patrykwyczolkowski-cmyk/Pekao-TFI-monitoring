@@ -2,7 +2,7 @@ name: Daily Monitor — Pekao TFI
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Codziennie o 7:00 czasu polskiego
+    - cron: '0 5 * * *'  # Codziennie o 7:00 czasu polskiego (CEST=UTC+2, CET=UTC+1 → używamy 5 UTC jako kompromis)
   workflow_dispatch:      # Możliwość ręcznego uruchomienia
 
 jobs:
