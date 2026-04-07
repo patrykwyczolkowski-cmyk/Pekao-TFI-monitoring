@@ -64,7 +64,7 @@ class GeminiEngine:
             raise EnvironmentError("Brak zmiennej środowiskowej GEMINI_API_KEY")
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(
-            model_name="gemini-3-flash", 
+            model_name="gemini-1.5-flash-latest",
             system_instruction=SYSTEM_PROMPT
         )
         self.config = config
