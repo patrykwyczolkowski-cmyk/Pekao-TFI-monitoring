@@ -11,6 +11,8 @@ sheets:
     monthly: "monthly_summary"
     management: "management_mentions"
     dedup_cache: "url_cache"
+    competitors: "competitors"
+    competitor_cache: "competitor_url_cache"
 
 thresholds:
   crisis: 3

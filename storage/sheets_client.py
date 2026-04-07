@@ -23,6 +23,11 @@ MANAGEMENT_HEADERS = [
     "typ_wypowiedzi", "sentyment", "temat", "cytat_kluczowy", "pilnosc", "podsumowanie"
 ]
 URL_CACHE_HEADERS = ["url_hash"]
+COMPETITOR_HEADERS = [
+    "date", "competitor", "source", "title", "url",
+    "sentyment_koncowy", "kategoria", "podsumowanie"
+]
+COMPETITOR_CACHE_HEADERS = ["url_hash"]
 
 
 class SheetsClient:
@@ -52,6 +57,8 @@ class SheetsClient:
         self._ensure_headers(self.tabs["raw_data"], RAW_DATA_HEADERS)
         self._ensure_headers(self.tabs["management"], MANAGEMENT_HEADERS)
         self._ensure_headers(self.tabs["dedup_cache"], URL_CACHE_HEADERS)
+        self._ensure_headers(self.tabs.get("competitors", "competitors"), COMPETITOR_HEADERS)
+        self._ensure_headers(self.tabs.get("competitor_cache", "competitor_cache"), COMPETITOR_CACHE_HEADERS)
 
     def _ensure_headers(self, tab_name: str, headers: list[str]):
         try:
@@ -166,6 +173,50 @@ class SheetsClient:
             self._retry(sheet.append_rows, rows)
         except Exception as e:
             log.error(f"Błąd zapisu cache: {e}")
+
+    def append_competitors(self, mentions: list[dict]):
+        """Zapisz wzmianki o konkurencji."""
+        try:
+            tab = self.tabs.get("competitors", "competitors")
+            sheet = self._get_or_create_sheet(tab)
+            rows = []
+            for m in mentions:
+                rows.append([
+                    m.get("date", ""),
+                    m.get("competitor", ""),
+                    m.get("source", ""),
+                    m.get("title", ""),
+                    m.get("url", ""),
+                    m.get("sentyment_koncowy", ""),
+                    m.get("kategoria", ""),
+                    m.get("podsumowanie", ""),
+                ])
+            if rows:
+                self._retry(sheet.append_rows, rows)
+                log.info(f"Zapisano {len(rows)} wzmianek o konkurencji do Sheets")
+        except Exception as e:
+            log.error(f"Błąd zapisu konkurencji do Sheets: {e}")
+
+    def get_competitor_url_cache(self) -> list[str]:
+        """Pobierz znane hashe URL konkurencji."""
+        try:
+            tab = self.tabs.get("competitor_cache", "competitor_cache")
+            sheet = self._get_or_create_sheet(tab)
+            values = sheet.col_values(1)
+            return [v for v in values if v and v != "url_hash"]
+        except Exception as e:
+            log.error(f"Błąd pobierania cache URL konkurencji: {e}")
+            return []
+
+    def append_competitor_url_cache(self, hashes: list[str]):
+        """Zapisz nowe hashe URL konkurencji do cache."""
+        try:
+            tab = self.tabs.get("competitor_cache", "competitor_cache")
+            sheet = self._get_or_create_sheet(tab)
+            rows = [[h] for h in hashes]
+            self._retry(sheet.append_rows, rows)
+        except Exception as e:
+            log.error(f"Błąd zapisu cache URL konkurencji: {e}")
 
     def get_recent_scores(self, days: int = 7) -> list[dict]:
         """Pobierz wyniki z ostatnich N dni."""

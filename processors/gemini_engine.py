@@ -36,6 +36,15 @@ KOMENTARZE ({comment_count} szt.):
 Zwroc JSON (wszystkie klucze bez polskich znakow):
 {{"dotyczy_pekao_tfi": true, "sentyment_artykul": 5, "sentyment_komentarze": 5, "sentyment_koncowy": 5, "kategoria": "neutralna", "podsumowanie": "opis", "cytaty_kluczowe": [], "pilnosc": "niska", "wymaga_reakcji": false}}"""
 
+COMPETITOR_PROMPT = """Przeanalizuj wzmiankę medialną dotyczącą firmy {competitor}.
+
+TYTUL: {title}
+ZRODLO: {source}
+TRESC: {content}
+
+Zwroc JSON (wszystkie klucze bez polskich znakow):
+{{"dotyczy_konkurenta": true, "sentyment_koncowy": 5, "kategoria": "neutralna", "podsumowanie": "1-2 zdania po polsku"}}"""
+
 REQUIRED_FIELDS = {
     "dotyczy_pekao_tfi": bool,
     "sentyment_artykul": (int, float),
@@ -129,6 +138,40 @@ class GeminiEngine:
                 result[score_field] = max(1, min(10, float(val)))
             except (TypeError, ValueError):
                 result[score_field] = 5.0
+
+    def analyze_competitor(self, article: dict, competitor_name: str) -> dict:
+        """Uproszczona analiza dla artykułów o konkurencji."""
+        try:
+            prompt = COMPETITOR_PROMPT.format(
+                competitor=competitor_name,
+                title=article.get("title", "")[:500],
+                source=article.get("source", ""),
+                content=article.get("content", "")[:2000],
+            )
+            response = self.model.generate_content(prompt)
+            result = self._parse_response(response.text)
+
+            # Upewnij się że wymagane pola są obecne
+            result.setdefault("dotyczy_konkurenta", True)
+            result.setdefault("sentyment_koncowy", 5)
+            result.setdefault("kategoria", "neutralna")
+            result.setdefault("podsumowanie", "")
+            try:
+                result["sentyment_koncowy"] = max(1, min(10, float(result["sentyment_koncowy"])))
+            except (TypeError, ValueError):
+                result["sentyment_koncowy"] = 5.0
+
+            return {**article, **result}
+
+        except Exception as e:
+            log.error(f"Błąd Gemini (konkurent {competitor_name}): {e}")
+            return {
+                **article,
+                "dotyczy_konkurenta": True,
+                "sentyment_koncowy": 5,
+                "kategoria": "blad_analizy",
+                "podsumowanie": f"Błąd analizy: {str(e)[:200]}",
+            }
 
     def _fallback(self, article: dict, error_msg: str) -> dict:
         return {

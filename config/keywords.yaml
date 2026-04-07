@@ -40,6 +40,41 @@ management:
         - "Maciej Łoziński"
         - "Łoziński Pekao"
 
+competitors:
+  - name: "PKO TFI"
+    short: "PKO TFI"
+    keywords:
+      - "PKO TFI"
+      - "PKO Towarzystwo Funduszy Inwestycyjnych"
+      - "fundusze PKO"
+      - "pko tfi"
+    rss:
+      - name: "Google News — PKO TFI"
+        url: "https://news.google.com/rss/search?q=PKO+TFI&hl=pl&gl=PL&ceid=PL:pl"
+      - name: "Bankier RSS — PKO TFI"
+        url: "https://www.bankier.pl/rss/wiadomosci.xml"
+
+  - name: "TFI PZU"
+    short: "TFI PZU"
+    keywords:
+      - "TFI PZU"
+      - "PZU Towarzystwo Funduszy Inwestycyjnych"
+      - "fundusze PZU"
+      - "TFI PZU SA"
+    rss:
+      - name: "Google News — TFI PZU"
+        url: "https://news.google.com/rss/search?q=TFI+PZU&hl=pl&gl=PL&ceid=PL:pl"
+
+  - name: "Goldman Sachs TFI"
+    short: "GS TFI"
+    keywords:
+      - "Goldman Sachs TFI"
+      - "Goldman Sachs Towarzystwo Funduszy Inwestycyjnych"
+      - "Goldman Sachs Asset Management Polska"
+    rss:
+      - name: "Google News — Goldman Sachs TFI"
+        url: "https://news.google.com/rss/search?q=Goldman+Sachs+TFI&hl=pl&gl=PL&ceid=PL:pl"
+
 sources:
   rss:
     - name: "Google News PL"
